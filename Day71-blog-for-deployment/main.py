@@ -1,3 +1,4 @@
+import hashlib
 import os
 from datetime import date
 from functools import wraps
@@ -6,7 +7,6 @@ from dotenv import load_dotenv
 from flask import Flask, abort, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
-from flask_gravatar import Gravatar
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String, Text
@@ -37,16 +37,9 @@ login_manager.init_app(app)
 def load_user(user_id):
     return db.get_or_404(User, user_id)
 
-
-# For adding profile images to the comment section
-gravatar = Gravatar(app,
-                    size=100,
-                    rating='g',
-                    default='retro',
-                    force_default=False,
-                    force_lower=False,
-                    use_ssl=False,
-                    base_url=None)
+def gravatar_url(email, size=100, rating='g', default='retro', force_default=False):
+    hash_value = hashlib.sha256(email.lower().encode('utf-8')).hexdigest()
+    return f"https://www.gravatar.com/avatar/{hash_value}?s={size}&d={default}&r={rating}&f={force_default}"
 
 # CREATE DATABASE
 class Base(DeclarativeBase):
@@ -104,7 +97,6 @@ class Comment(db.Model):
 
 with app.app_context():
     db.create_all()
-
 
 # Create an admin-only decorator
 def admin_only(f):
@@ -206,7 +198,7 @@ def show_post(post_id):
         )
         db.session.add(new_comment)
         db.session.commit()
-    return render_template("post.html", post=requested_post, current_user=current_user, form=comment_form)
+    return render_template("post.html", post=requested_post, current_user=current_user, form=comment_form, gravatar_url=gravatar_url)
 
 
 # Use a decorator so only an admin user can create new posts
