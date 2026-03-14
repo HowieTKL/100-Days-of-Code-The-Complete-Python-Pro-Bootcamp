@@ -1,0 +1,5 @@
+Flask-SQLAlchemy
+Flask-Login
+greenlet
+colorama
+python-dotenv

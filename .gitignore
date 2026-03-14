@@ -1,0 +1,8 @@
+.DS_Store
+.idea/
+__pycache__/
+.env
+instance/
+selenium_chrome_profile/
+.sass-cache
+
